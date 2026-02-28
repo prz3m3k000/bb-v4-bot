@@ -23,6 +23,7 @@ QuickStepper::QuickStepper(
     pinMode(m1, OUTPUT);
     pinMode(m2, OUTPUT);
     pinMode(m3, OUTPUT);
+
 }
 
 void QuickStepper::begin() {
@@ -65,32 +66,51 @@ void QuickStepper::updateDirection(const float speed) {
 void QuickStepper::updateMicroSpeed(const float speed) {
     const float absSpeed = abs(speed);
 
+    // int newMicroSteps;
+    // if (absSpeed < 200) {
+    //     newMicroSteps = 16;
+    //     digitalWrite(m1, HIGH);
+    //     digitalWrite(m2, HIGH);
+    //     digitalWrite(m3, HIGH);
+    // } else if (absSpeed < 400) {
+    //     newMicroSteps = 8;
+    //     digitalWrite(m1, HIGH);
+    //     digitalWrite(m2, HIGH);
+    //     digitalWrite(m3, LOW);
+    // } else if (absSpeed < 800) {
+    //     newMicroSteps = 4;
+    //     digitalWrite(m1, LOW);
+    //     digitalWrite(m2, HIGH);
+    //     digitalWrite(m3, LOW);
+    // } else if (absSpeed < 1600) {
+    //     newMicroSteps = 2;
+    //     digitalWrite(m1, HIGH);
+    //     digitalWrite(m2, LOW);
+    //     digitalWrite(m3, LOW);
+    // } else {
+    //     newMicroSteps = 1;
+    //     digitalWrite(m1, LOW);
+    //     digitalWrite(m2, LOW);
+    //     digitalWrite(m3, LOW);
+    // }
+
     int newMicroSteps;
-    if (absSpeed < 200) {
-        newMicroSteps = 16;
+    if (absSpeed < 50) {
+        newMicroSteps = 32;
         digitalWrite(m1, HIGH);
         digitalWrite(m2, HIGH);
-        digitalWrite(m3, HIGH);
-    } else if (absSpeed < 400) {
+    } else if (absSpeed < 100) {
+        newMicroSteps = 16;
+        digitalWrite(m1, LOW);
+        digitalWrite(m2, HIGH);
+    } else if (absSpeed < 200) {
         newMicroSteps = 8;
         digitalWrite(m1, HIGH);
-        digitalWrite(m2, HIGH);
-        digitalWrite(m3, LOW);
-    } else if (absSpeed < 800) {
+        digitalWrite(m2, LOW);
+    } else  {
         newMicroSteps = 4;
         digitalWrite(m1, LOW);
-        digitalWrite(m2, HIGH);
-        digitalWrite(m3, LOW);
-    } else if (absSpeed < 1600) {
-        newMicroSteps = 2;
-        digitalWrite(m1, HIGH);
         digitalWrite(m2, LOW);
-        digitalWrite(m3, LOW);
-    } else {
-        newMicroSteps = 1;
-        digitalWrite(m1, LOW);
-        digitalWrite(m2, LOW);
-        digitalWrite(m3, LOW);
     }
     microSteps = newMicroSteps;
 

@@ -3,45 +3,48 @@
 MotionProcessing::MotionProcessing(float alpha) {
     this->imu = new MPU6050();
     imu->initialize();
-    imu->dmpInitialize();
+    imu->setFullScaleGyroRange(MPU6050_GYRO_FS_250);
+    imu->setFullScaleAccelRange(MPU6050_ACCEL_FS_2);
+    imu->setDLPFMode(MPU6050_DLPF_BW_42);
 
-    // calibrate();
+
     restoreCalibration();
 
     imu->setDMPEnabled(true);
     this->alpha = alpha;
 }
 
-void MotionProcessing::computeOrientation(float *pitch, float *roll, float *yaw, float *gyroRateX, float *gyroRateY, float *gyroRateZ) {
-    uint8_t fifoBuffer[64];
-    if (imu->dmpGetCurrentFIFOPacket(fifoBuffer)) {
-        Quaternion q;
-        imu->dmpGetQuaternion(&q, fifoBuffer);
+void MotionProcessing::computeOrientation(float dt, float *pitch, float *roll, float *yaw, float *ax, float *ay, float *az, float *gx, float *gy, float *gz) {
+    int16_t iax, iay, iaz;
+    int16_t igx, igy, igz;
+    imu->getMotion6(&iax, &iay, &iaz, &igx, &igy, &igz);
 
-        VectorFloat gravity;
-        imu->dmpGetGravity(&gravity, &q);
+    float accelX = iax / 16384.0f;
+    float accelY = iay / 16384.0f;
+    float accelZ = iaz / 16384.0f;
+    float gyroX = igx / 131.0f;
+    float gyroY = igy / 131.0f;
+    float gyroZ = igz / 131.0f;
 
-        float ypr[3];
-        imu->dmpGetYawPitchRoll(ypr, &q, &gravity);
-
-        VectorInt16 gyro;
-        imu->dmpGetGyro(&gyro, fifoBuffer);
-
-        lastPitch = ypr[2] * 180.0 / M_PI;
-        lastRoll = ypr[1] * 180.0 / M_PI;
-        lastYaw = ypr[0] * 180.0 / M_PI;
-        lastGyroRateX = gyro.x;
-        lastGyroRateY = gyro.y;
-        lastGyroRateZ = gyro.z;
-    }
+    lastAccelY = 0.95f * lastAccelY + 0.05f * accelY;
+    float accelAngel = atan2(lastAccelY, accelZ) * 180.0f / M_PI;
+    lastPitch = alpha * (lastPitch + gyroX * dt) + (1 - alpha) * accelAngel;
 
     *pitch = lastPitch;
-    *roll = lastRoll;
-    *yaw = lastYaw;
+    *roll = 0;
+    *yaw = 0;
 
-    *gyroRateX = lastGyroRateX;
-    *gyroRateY = lastGyroRateY;
-    *gyroRateZ = lastGyroRateZ;
+    *ax = accelX;
+    *ay = lastAccelY;
+    *az = accelZ;
+
+    *gx = gyroX;
+    *gy = gyroY;
+    *gz = gyroZ;
+}
+
+void computeOrientation(float *pitch, float *roll, float *yaw, float *gyroRateX, float *gyroRateY, float *gyroRateZ) {
+
 }
 
 void MotionProcessing::calibrate() const {

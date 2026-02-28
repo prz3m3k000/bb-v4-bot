@@ -13,15 +13,15 @@ enum class DashboardCommandId: uint8_t {
 struct BotTelemetryMsg {
     DashboardCommandId cmd;
     uint32_t timestamp;
-    uint32_t dt;
+    float dt;
     float ax, ay, az;
+    float gx, gy, gz;
     float pitch, roll, yaw;
 };
 
 struct BotPidTelemetryMsg {
     DashboardCommandId cmd;
-    uint32_t timestamp, dt;
-    float setpoint, measurement, output;
+    float input, setpoint, error, output;
     float p_term, i_term, d_term;
 };
 #pragma pack(pop)

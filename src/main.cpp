@@ -20,6 +20,7 @@ constexpr uint32_t BOT_LOOP_INTERVAL_MS = 10; // 10uS
 WiFiUDP *udp;
 
 InboundCommandReceiver *commandReceiver;
+OutboundCommandSender *commandSender;
 PidController *speedPid;
 PidController *pitchPid;
 MotorBase *motorBase;
@@ -53,8 +54,9 @@ void setup() {
     motorBase = new MotorBase(md1, md2);
 
     motionProcessing = new MotionProcessing(0.995);
+    commandSender = new OutboundCommandSender(udp);
 
-    bot = new Bot(speedPid, pitchPid, motorBase, motionProcessing);
+    bot = new Bot(speedPid, pitchPid, motorBase, motionProcessing, commandSender);
     commandReceiver = new InboundCommandReceiver(bot, udp);
 
     commandReceiverTimer = new StopWatch();

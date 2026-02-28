@@ -33,6 +33,9 @@ float PidController::compute(const float input, const float setPoint, const floa
     }
 
     lastInput = input;
+    lastOutput = output;
+    lastSetpoint = setPoint;
+
     return output;
 }
 

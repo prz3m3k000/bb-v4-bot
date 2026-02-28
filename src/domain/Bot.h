@@ -2,6 +2,8 @@
 
 #include <Arduino.h>
 
+#include "filters/Butterworth.h"
+#include "infra/OutboundCommandSender.h"
 #include "motion_processing/MotionProcessing.h"
 #include "motor/MotorBase.h"
 #include "pid/PidController.h"
@@ -9,9 +11,7 @@
 
 class Bot {
 public:
-    Bot(PidController *speedPid, PidController *pitchPid, MotorBase *motorBase, MotionProcessing *motionProcessing);
-
-    void setDashboardAddress(IPAddress ip, uint16_t port);
+    Bot(PidController *speedPid, PidController *pitchPid, MotorBase *motorBase, MotionProcessing *motionProcessing, OutboundCommandSender *commandSender);
 
     void setSpeedPidCoefficients(float p, float i, float d, float output) const;
 
@@ -27,18 +27,28 @@ public:
 
     void resetPitchPid() const;
 
+    void sendBotTelemetry(float timestamp, float dt, float ax, float ay, float az, float gx, float gy, float gz, float pitch, float roll, float yaw) const;
+
+    void sendPitchPidTelemetry() const;
+
+    void sendSpeedPidTelemetry() const;
+
     void nextStep();
+
+    void setDashboardAddress(const IPAddress &remoteIP, uint16_t remotePort) const;
 
 private:
     PidController *speedPid;
     PidController *pitchPid;
     MotorBase *motorBase;
     MotionProcessing *motionProcessing;
+    OutboundCommandSender *commandSender;
 
     StopWatch *timer;
     StopWatch *speedTimer;
     StopWatch *pitchTimer;
     StopWatch *logTimer;
+    Butterworth *pitchFeedbackFilter;
 
     float pitchSetpoint = 0;
     float speedSetpointOffset = 0;
